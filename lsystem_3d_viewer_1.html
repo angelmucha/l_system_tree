@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L-System 3D · Generador de árboles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --ink:#0A1420;
+  --ink-2:#0F1D2E;
+  --panel:#122438;
+  --line:#1E3A55;
+  --amber:#E0A03C;
+  --sage:#8FBF7F;
+  --text:#C9DCEC;
+  --text-dim:#6E8CA6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--ink);
+  color:var(--text);
+  font-family:'IBM Plex Sans',system-ui,sans-serif;
+  display:flex;
+  overflow:hidden;
+}
+@media (max-width:820px){ body{flex-direction:column;overflow:auto} }
+
+/* ---------- Panel ---------- */
+#panel{
+  width:320px;flex:0 0 320px;
+  background:linear-gradient(180deg,var(--ink-2),var(--panel));
+  border-right:1px solid var(--line);
+  padding:20px 18px 28px;
+  overflow-y:auto;
+}
+@media (max-width:820px){ #panel{width:100%;flex:none;border-right:none;border-bottom:1px solid var(--line)} }
+
+h1{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:15px;font-weight:600;letter-spacing:.04em;
+  color:#fff;margin-bottom:2px;
+}
+.sub{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px}
+
+.group{margin-bottom:18px}
+.group-title{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--amber);
+  padding-bottom:6px;margin-bottom:10px;border-bottom:1px solid var(--line);
+}
+
+label{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);margin-bottom:5px;display:flex;justify-content:space-between}
+label b{color:var(--text);font-weight:500}
+
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:3px;
+  background:var(--line);border-radius:2px;outline:none;margin-bottom:13px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  background:var(--amber);cursor:pointer;border:2px solid var(--ink);
+}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--amber);cursor:pointer;border:2px solid var(--ink)}
+input[type=range]:focus-visible{outline:2px solid var(--sage);outline-offset:3px}
+
+select,input[type=text]{
+  width:100%;background:var(--ink);color:var(--text);
+  border:1px solid var(--line);border-radius:3px;
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+  padding:7px 8px;margin-bottom:9px;
+}
+select:focus,input[type=text]:focus{outline:none;border-color:var(--amber)}
+
+.rule-row{display:flex;gap:6px;align-items:center;margin-bottom:7px}
+.rule-row .key{
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--amber);
+  width:26px;text-align:center;flex:0 0 26px;
+}
+.rule-row input{margin-bottom:0}
+
+button{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;
+  background:transparent;color:var(--text);
+  border:1px solid var(--line);border-radius:3px;
+  padding:8px 10px;cursor:pointer;transition:.15s;
+}
+button:hover{border-color:var(--amber);color:var(--amber)}
+button:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+.btn-row{display:flex;gap:7px}
+.btn-row button{flex:1}
+button.primary{background:var(--amber);color:var(--ink);border-color:var(--amber);font-weight:600}
+button.primary:hover{filter:brightness(1.1)}
+
+/* ---------- Genoma (elemento firma) ---------- */
+#genome-wrap{
+  background:var(--ink);border:1px solid var(--line);border-radius:3px;
+  padding:9px 10px;margin-top:4px;
+}
+#genome{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;line-height:1.7;
+  word-break:break-all;max-height:78px;overflow:hidden;color:var(--text-dim);
+}
+#genome .d{color:var(--sage)}      /* dibuja */
+#genome .r{color:var(--amber)}     /* rota */
+#genome .b{color:#7FA8D4}          /* ramifica */
+#genome .l{color:#D46F8F}          /* hoja */
+
+/* ---------- Métricas ---------- */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.stat{background:var(--ink);border:1px solid var(--line);border-radius:3px;padding:8px 9px}
+.stat .n{font-family:'IBM Plex Mono',monospace;font-size:15px;color:#fff;font-weight:500;line-height:1.2}
+.stat .k{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+
+/* ---------- Viewport ---------- */
+#view{flex:1;position:relative;min-height:0}
+@media (max-width:820px){ #view{height:60vh;flex:none} }
+canvas{display:block;width:100%;height:100%}
+#hud{
+  position:absolute;left:16px;bottom:14px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--text-dim);letter-spacing:.05em;pointer-events:none;
+}
+#warn{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  background:#3A1F14;border:1px solid #7A4520;color:#E0A03C;
+  padding:7px 13px;border-radius:3px;display:none;
+}
+.legend{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--text-dim);margin-top:7px;line-height:1.6}
+.legend span{margin-right:9px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <h1>L-System 3D</h1>
+  <div class="sub">Generador procedural de árboles</div>
+
+  <div class="group">
+    <div class="group-title">Gramática</div>
+    <select id="preset"></select>
+    <div id="rules"></div>
+    <div style="font-family:'IBM Plex Mono';font-size:10px;color:var(--text-dim);line-height:1.6;margin-top:6px">
+      F dibuja · +− giro · &^ inclinación · \/ rotación<br>
+      [ ] rama · ! adelgaza · L hoja
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title">Parámetros</div>
+    <label>Iteraciones <b id="v-iter">5</b></label>
+    <input type="range" id="iter" min="1" max="8" step="1" value="5">
+
+    <label>Ángulo <b id="v-angle">22.5°</b></label>
+    <input type="range" id="angle" min="5" max="60" step="0.5" value="22.5">
+
+    <label>Reducción por rama <b id="v-scale">0.85</b></label>
+    <input type="range" id="scale" min="0.5" max="1" step="0.01" value="0.85">
+
+    <label>Grosor del tronco <b id="v-width">0.06</b></label>
+    <input type="range" id="width" min="0.01" max="0.15" step="0.005" value="0.06">
+
+    <label>Aleatoriedad <b id="v-rand">0.15</b></label>
+    <input type="range" id="rand" min="0" max="0.6" step="0.01" value="0.15">
+
+    <label>Semilla <b id="v-seed">7</b></label>
+    <input type="range" id="seed" min="1" max="60" step="1" value="7">
+  </div>
+
+  <div class="group">
+    <div class="group-title">Cadena generada</div>
+    <div id="genome-wrap"><div id="genome"></div></div>
+    <div class="legend">
+      <span style="color:var(--sage)">■ dibuja</span>
+      <span style="color:var(--amber)">■ rota</span>
+      <span style="color:#7FA8D4">■ rama</span>
+      <span style="color:#D46F8F">■ hoja</span>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="group-title">Métricas</div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="s-len">–</div><div class="k">símbolos</div></div>
+      <div class="stat"><div class="n" id="s-seg">–</div><div class="k">ramas</div></div>
+      <div class="stat"><div class="n" id="s-leaf">–</div><div class="k">hojas</div></div>
+      <div class="stat"><div class="n" id="s-ms">–</div><div class="k">ms generación</div></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button id="btn-rot">Girar auto</button>
+    <button id="btn-reset">Recentrar</button>
+  </div>
+</div>
+
+<div id="view">
+  <div id="warn"></div>
+  <div id="hud">arrastra para orbitar · rueda para zoom · <span id="fps">–</span> fps</div>
+</div>
+
+<script>
+// ============================================================
+//  PRESETS DE GRAMÁTICAS
+// ============================================================
+const PRESETS = {
+  "Árbol 3D (ABOP, Prusinkiewicz)": {
+    axiom: "A",
+    rules: { A: "[&FL!A]/////[&FL!A]///////[&FL!A]", F: "S/////F", S: "FL" },
+    iter: 5, angle: 22.5, scale: 0.92, width: 0.055
+  },
+  "Ramificación ternaria": {
+    axiom: "F",
+    rules: { F: "F[&+F]F[&-F][/^F]" },
+    iter: 4, angle: 28, scale: 0.78, width: 0.05
+  },
+  "Arbusto denso": {
+    axiom: "F",
+    rules: { F: "FF-[&F+F+FL]+[^F-F-FL]/" },
+    iter: 4, angle: 24, scale: 0.82, width: 0.045
+  },
+  "Binario simple (tu script 2D → 3D)": {
+    axiom: "0",
+    rules: { "0": "1[+&0][-^0][/0]", "1": "11" },
+    iter: 5, angle: 30, scale: 0.72, width: 0.05
+  },
+  "Palmera / abanico": {
+    axiom: "A",
+    rules: { A: "F[&FL][/&FL][//&FL][///&FL][////&FL]", F: "FF" },
+    iter: 3, angle: 40, scale: 0.88, width: 0.07
+  }
+};
+
+// ============================================================
+//  1. EXPANSIÓN DEL L-SYSTEM
+// ============================================================
+const MAX_SYMBOLS = 900000;
+function expand(axiom, rules, iterations){
+  let s = axiom;
+  for(let i=0;i<iterations;i++){
+    let out = "";
+    for(const c of s) out += (rules[c] !== undefined ? rules[c] : c);
+    if(out.length > MAX_SYMBOLS) return { str: s, capped: true, level: i };
+    s = out;
+  }
+  return { str: s, capped: false, level: iterations };
+}
+
+// ============================================================
+//  2. TORTUGA 3D  (base ortonormal H / L / U)
+// ============================================================
+function mulberry32(a){ return function(){ a|=0;a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; } }
+
+function interpret(str, opt){
+  const rnd = mulberry32(opt.seed*7919);
+  const jit = () => 1 + (rnd()*2-1)*opt.rand;
+
+  const t = {
+    pos: new THREE.Vector3(0,0,0),
+    H:   new THREE.Vector3(0,1,0),   // heading  (hacia dónde avanza)
+    L:   new THREE.Vector3(1,0,0),   // left
+    U:   new THREE.Vector3(0,0,-1),  // up
+    len: opt.len,
+    wid: opt.width,
+    depth: 0
+  };
+  const stack = [];
+  const segs = [], leaves = [];
+  const A = opt.angle;
+
+  const rot = (v,axis,ang) => v.applyAxisAngle(axis, ang);
+
+  for(const c of str){
+    switch(c){
+      case 'F': case 'S': case '0': case '1': {
+        const l = t.len * jit();
+        const next = t.pos.clone().addScaledVector(t.H, l);
+        segs.push({ a:t.pos.clone(), b:next, w:t.wid, d:t.depth, h:t.H.clone() });
+        t.pos = next;
+        break;
+      }
+      case 'L': leaves.push({ p:t.pos.clone(), h:t.H.clone(), l:t.L.clone() }); break;
+      case '+': { const u=t.U.clone(); rot(t.H,u, A*jit()); rot(t.L,u, A*jit()); break; }
+      case '-': { const u=t.U.clone(); rot(t.H,u,-A*jit()); rot(t.L,u,-A*jit()); break; }
+      case '&': { const l=t.L.clone(); rot(t.H,l, A*jit()); rot(t.U,l, A*jit()); break; }
+      case '^': { const l=t.L.clone(); rot(t.H,l,-A*jit()); rot(t.U,l,-A*jit()); break; }
+      case '/': { const h=t.H.clone(); rot(t.L,h, A*jit()); rot(t.U,h, A*jit()); break; }
+      case '\\':{ const h=t.H.clone(); rot(t.L,h,-A*jit()); rot(t.U,h,-A*jit()); break; }
+      case '!': t.wid *= 0.85; break;
+      case '[':
+        stack.push({ pos:t.pos.clone(), H:t.H.clone(), L:t.L.clone(), U:t.U.clone(), len:t.len, wid:t.wid, depth:t.depth });
+        t.len *= opt.scale; t.wid *= opt.scale; t.depth++;
+        break;
+      case ']': {
+        const s = stack.pop();
+        if(s){ t.pos=s.pos; t.H=s.H; t.L=s.L; t.U=s.U; t.len=s.len; t.wid=s.wid; t.depth=s.depth; }
+        break;
+      }
+    }
+  }
+  return { segs, leaves };
+}
+
+// ============================================================
+//  3. ESCENA THREE.JS
+// ============================================================
+const view = document.getElementById('view');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0A1420);
+scene.fog = new THREE.Fog(0x0A1420, 14, 42);
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.05, 300);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+view.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0x9FC4E8, 0x162436, 0.75));
+const key = new THREE.DirectionalLight(0xFFF0D8, 1.0);
+key.position.set(6, 12, 5); scene.add(key);
+const rim = new THREE.DirectionalLight(0x5A86B8, 0.5);
+rim.position.set(-7, 4, -6); scene.add(rim);
+
+const grid = new THREE.GridHelper(40, 40, 0x1E3A55, 0x14283C);
+grid.material.transparent = true; grid.material.opacity = 0.55;
+scene.add(grid);
+
+const treeGroup = new THREE.Group();
+scene.add(treeGroup);
+
+const barkGeo = new THREE.CylinderGeometry(0.78, 1, 1, 7, 1, true);
+barkGeo.translate(0, 0.5, 0);
+const barkMat = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide });
+const leafGeo = new THREE.IcosahedronGeometry(1, 0);
+const leafMat = new THREE.MeshLambertMaterial({ flatShading:true });
+
+let branchMesh = null, leafMesh = null;
+
+const C_BASE = new THREE.Color(0x6B4A2E);   // corteza
+const C_TIP  = new THREE.Color(0x8FBF7F);   // ramas jóvenes
+const C_LEAF = new THREE.Color(0x7FC46B);
+
+function buildTree(segs, leaves){
+  if(branchMesh){ treeGroup.remove(branchMesh); branchMesh.dispose && branchMesh.dispose(); }
+  if(leafMesh){ treeGroup.remove(leafMesh); leafMesh.dispose && leafMesh.dispose(); }
+  if(!segs.length) return { height:1 };
+
+  const maxD = segs.reduce((m,s)=>Math.max(m,s.d),0) || 1;
+  const dummy = new THREE.Object3D();
+  const up = new THREE.Vector3(0,1,0);
+  const q = new THREE.Quaternion();
+  const col = new THREE.Color();
+
+  branchMesh = new THREE.InstancedMesh(barkGeo, barkMat, segs.length);
+  let maxY = 0;
+  segs.forEach((s,i)=>{
+    const dir = s.b.clone().sub(s.a);
+    const len = dir.length();
+    q.setFromUnitVectors(up, dir.normalize());
+    dummy.position.copy(s.a);
+    dummy.quaternion.copy(q);
+    dummy.scale.set(s.w, len, s.w);
+    dummy.updateMatrix();
+    branchMesh.setMatrixAt(i, dummy.matrix);
+    col.copy(C_BASE).lerp(C_TIP, Math.min(s.d/maxD,1)*0.85);
+    branchMesh.setColorAt(i, col);
+    maxY = Math.max(maxY, s.b.y);
+  });
+  branchMesh.instanceMatrix.needsUpdate = true;
+  if(branchMesh.instanceColor) branchMesh.instanceColor.needsUpdate = true;
+  treeGroup.add(branchMesh);
+
+  if(leaves.length){
+    leafMesh = new THREE.InstancedMesh(leafGeo, leafMat, leaves.length);
+    leaves.forEach((lf,i)=>{
+      q.setFromUnitVectors(up, lf.h.clone().normalize());
+      dummy.position.copy(lf.p);
+      dummy.quaternion.copy(q);
+      const s = 0.055 + (i%5)*0.006;
+      dummy.scale.set(s*1.4, s*0.5, s);
+      dummy.updateMatrix();
+      leafMesh.setMatrixAt(i, dummy.matrix);
+      col.copy(C_LEAF).offsetHSL(0, 0, (i%7)/70 - 0.05);
+      leafMesh.setColorAt(i, col);
+    });
+    leafMesh.instanceMatrix.needsUpdate = true;
+    if(leafMesh.instanceColor) leafMesh.instanceColor.needsUpdate = true;
+    treeGroup.add(leafMesh);
+  }
+  return { height: maxY };
+}
+
+// ---------- Controles orbitales propios ----------
+const orbit = { theta: 0.7, phi: 1.15, radius: 12, target: new THREE.Vector3(0,3,0), autoRotate:false };
+function applyCamera(){
+  const r = orbit.radius, p = Math.max(0.15, Math.min(Math.PI-0.15, orbit.phi));
+  camera.position.set(
+    orbit.target.x + r*Math.sin(p)*Math.sin(orbit.theta),
+    orbit.target.y + r*Math.cos(p),
+    orbit.target.z + r*Math.sin(p)*Math.cos(orbit.theta)
+  );
+  camera.lookAt(orbit.target);
+}
+let dragging=false, lastX=0, lastY=0;
+const el = renderer.domElement;
+el.addEventListener('pointerdown', e=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; el.setPointerCapture(e.pointerId); });
+el.addEventListener('pointerup',   e=>{ dragging=false; });
+el.addEventListener('pointermove', e=>{
+  if(!dragging) return;
+  orbit.theta -= (e.clientX-lastX)*0.006;
+  orbit.phi   -= (e.clientY-lastY)*0.006;
+  lastX=e.clientX; lastY=e.clientY;
+});
+el.addEventListener('wheel', e=>{ e.preventDefault(); orbit.radius = Math.max(1.5, Math.min(60, orbit.radius * (1 + Math.sign(e.deltaY)*0.09))); }, {passive:false});
+
+function resize(){
+  const w = view.clientWidth, h = view.clientHeight;
+  renderer.setSize(w,h,false);
+  camera.aspect = w/h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+
+// ---------- Loop ----------
+let frames=0, fpsT=performance.now();
+function loop(){
+  requestAnimationFrame(loop);
+  if(orbit.autoRotate) orbit.theta += 0.0035;
+  applyCamera();
+  renderer.render(scene, camera);
+  frames++;
+  const now = performance.now();
+  if(now-fpsT > 700){
+    document.getElementById('fps').textContent = Math.round(frames*1000/(now-fpsT));
+    frames=0; fpsT=now;
+  }
+}
+
+// ============================================================
+//  4. UI
+// ============================================================
+const $ = id => document.getElementById(id);
+let currentRules = {}, currentAxiom = "";
+
+function renderRuleInputs(){
+  const box = $('rules'); box.innerHTML = '';
+  const ax = document.createElement('div');
+  ax.className = 'rule-row';
+  ax.innerHTML = `<div class="key">ω</div><input type="text" value="${currentAxiom}" data-axiom>`;
+  ax.querySelector('input').addEventListener('change', e=>{ currentAxiom = e.target.value.trim(); regenerate(); });
+  box.appendChild(ax);
+
+  Object.keys(currentRules).forEach(k=>{
+    const row = document.createElement('div');
+    row.className = 'rule-row';
+    row.innerHTML = `<div class="key">${k}→</div><input type="text" value="${currentRules[k]}">`;
+    row.querySelector('input').addEventListener('change', e=>{ currentRules[k] = e.target.value; regenerate(); });
+    box.appendChild(row);
+  });
+}
+
+const DRAW = 'FS01', ROT = '+-&^/\\', BRA = '[]';
+function paintGenome(s){
+  const slice = s.slice(0, 900);
+  let html = '';
+  for(const c of slice){
+    if(DRAW.includes(c))      html += `<span class="d">${c}</span>`;
+    else if(ROT.includes(c))  html += `<span class="r">${c==='<'?'&lt;':c}</span>`;
+    else if(BRA.includes(c))  html += `<span class="b">${c}</span>`;
+    else if(c==='L')          html += `<span class="l">L</span>`;
+    else html += c;
+  }
+  $('genome').innerHTML = html + (s.length>900 ? ' …' : '');
+}
+
+function regenerate(){
+  const t0 = performance.now();
+  const iterations = +$('iter').value;
+  const res = expand(currentAxiom, currentRules, iterations);
+  const { segs, leaves } = interpret(res.str, {
+    angle: +$('angle').value * Math.PI/180,
+    scale: +$('scale').value,
+    width: +$('width').value,
+    rand:  +$('rand').value,
+    seed:  +$('seed').value,
+    len:   1.0
+  });
+  const t1 = performance.now();
+  const info = buildTree(segs, leaves);
+
+  $('s-len').textContent  = res.str.length.toLocaleString('es');
+  $('s-seg').textContent  = segs.length.toLocaleString('es');
+  $('s-leaf').textContent = leaves.length.toLocaleString('es');
+  $('s-ms').textContent   = (t1-t0).toFixed(1);
+  paintGenome(res.str);
+
+  const warn = $('warn');
+  if(res.capped){
+    warn.style.display='block';
+    warn.textContent = `Límite alcanzado: se muestra la iteración ${res.level}`;
+  } else warn.style.display='none';
+
+  orbit.target.set(0, (info.height||4)*0.45, 0);
+}
+
+function frameCamera(){
+  const h = branchMesh ? new THREE.Box3().setFromObject(treeGroup).max.y : 5;
+  orbit.radius = Math.max(4, h*1.9);
+  orbit.target.set(0, h*0.45, 0);
+  orbit.theta = 0.7; orbit.phi = 1.2;
+}
+
+// sliders
+[['iter','v-iter',v=>v],['angle','v-angle',v=>v+'°'],['scale','v-scale',v=>v],
+ ['width','v-width',v=>v],['rand','v-rand',v=>v],['seed','v-seed',v=>v]].forEach(([id,out,fmt])=>{
+  $(id).addEventListener('input', e=>{ $(out).textContent = fmt(e.target.value); regenerate(); });
+});
+
+// presets
+const sel = $('preset');
+Object.keys(PRESETS).forEach(name=>{
+  const o = document.createElement('option'); o.value=name; o.textContent=name; sel.appendChild(o);
+});
+function loadPreset(name){
+  const p = PRESETS[name];
+  currentAxiom = p.axiom;
+  currentRules = Object.assign({}, p.rules);
+  $('iter').value = p.iter;   $('v-iter').textContent = p.iter;
+  $('angle').value = p.angle; $('v-angle').textContent = p.angle+'°';
+  $('scale').value = p.scale; $('v-scale').textContent = p.scale;
+  $('width').value = p.width; $('v-width').textContent = p.width;
+  renderRuleInputs();
+  regenerate();
+  frameCamera();
+}
+sel.addEventListener('change', e=>loadPreset(e.target.value));
+
+$('btn-rot').addEventListener('click', e=>{
+  orbit.autoRotate = !orbit.autoRotate;
+  e.target.textContent = orbit.autoRotate ? 'Detener giro' : 'Girar auto';
+});
+$('btn-reset').addEventListener('click', frameCamera);
+
+// arranque
+resize();
+loadPreset(Object.keys(PRESETS)[0]);
+loop();
+</script>
+</body>
+</html>
