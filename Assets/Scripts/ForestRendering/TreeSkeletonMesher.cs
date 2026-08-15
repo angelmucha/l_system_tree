@@ -18,7 +18,7 @@ namespace Bosque.ForestRendering
     }
 
     /// <summary>
-    /// Persona B: converts the L-system skeleton delivered by A into renderable meshes.
+    /// Jean: converts the L-system skeleton delivered by A into renderable meshes.
     /// The forest renderer reuses these meshes through GPU instancing.
     /// </summary>
     public static class TreeSkeletonMesher

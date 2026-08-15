@@ -9,59 +9,59 @@ using Bosque.ForestRendering;
 
 namespace Bosque.EditorTools
 {
-    public static class PersonaBSceneBuilder
+    public static class JeanSceneBuilder
     {
-        const string GENERATED_FOLDER = "Assets/ForestBGenerated";
+        const string GENERATED_FOLDER = "Assets/JeanGenerated";
         const string MATERIAL_FOLDER = "Assets/Materials";
-        const string SCENE_PATH = "Assets/Scenes/PersonaB_Forest_Showcase.unity";
-        const string SPECIES_PATH = "Assets/Species/PersonaB_ShowcaseSpecies.asset";
-        const string TERRAIN_PATH = GENERATED_FOLDER + "/PersonaB_Terrain.asset";
-        const string FLOOR_MESH_PATH = GENERATED_FOLDER + "/PersonaB_ForestFloor.asset";
-        const string GRASS_MESH_PATH = GENERATED_FOLDER + "/PersonaB_GrassBlades.asset";
-        const string PATH_MESH_PATH = GENERATED_FOLDER + "/PersonaB_ForestPath.asset";
-        const string ROCK_MESH_PATH = GENERATED_FOLDER + "/PersonaB_LowPolyRock.asset";
+        const string SCENE_PATH = "Assets/Scenes/Jean_Forest_Showcase.unity";
+        const string SPECIES_PATH = "Assets/Species/Jean_ShowcaseSpecies.asset";
+        const string TERRAIN_PATH = GENERATED_FOLDER + "/Jean_Terrain.asset";
+        const string FLOOR_MESH_PATH = GENERATED_FOLDER + "/Jean_ForestFloor.asset";
+        const string GRASS_MESH_PATH = GENERATED_FOLDER + "/Jean_GrassBlades.asset";
+        const string PATH_MESH_PATH = GENERATED_FOLDER + "/Jean_ForestPath.asset";
+        const string ROCK_MESH_PATH = GENERATED_FOLDER + "/Jean_LowPolyRock.asset";
 
         const float TERRAIN_SIZE = 190f;
         const float TERRAIN_HEIGHT = 14f;
         const float TERRAIN_BASE_Y = -0.7f;
 
-        [MenuItem("Bosque/Persona B/Build Forest Showcase Scene")]
+        [MenuItem("Bosque/Jean/Build Forest Showcase Scene")]
         public static void BuildForestShowcaseScene()
         {
             EnsureFolders();
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            scene.name = "PersonaB_Forest_Showcase";
+            scene.name = "Jean_Forest_Showcase";
 
-            Material bark = GetOrCreateMaterial(MATERIAL_FOLDER + "/PersonaB_Bark_Instanced.mat",
-                "PersonaB_Bark_Instanced", new Color(0.34f, 0.20f, 0.11f), 0.48f, false);
+            Material bark = GetOrCreateMaterial(MATERIAL_FOLDER + "/Jean_Bark_Instanced.mat",
+                "Jean_Bark_Instanced", new Color(0.34f, 0.20f, 0.11f), 0.48f, false);
 
-            Material leaves = GetOrCreateMaterial(MATERIAL_FOLDER + "/PersonaB_Leaves_Instanced.mat",
-                "PersonaB_Leaves_Instanced", new Color(0.10f, 0.43f, 0.15f), 0.20f, true);
+            Material leaves = GetOrCreateMaterial(MATERIAL_FOLDER + "/Jean_Leaves_Instanced.mat",
+                "Jean_Leaves_Instanced", new Color(0.10f, 0.43f, 0.15f), 0.20f, true);
 
-            Material billboard = GetOrCreateMaterial(MATERIAL_FOLDER + "/PersonaB_Billboard_Instanced.mat",
-                "PersonaB_Billboard_Instanced", new Color(0.08f, 0.31f, 0.11f), 0.12f, true);
+            Material billboard = GetOrCreateMaterial(MATERIAL_FOLDER + "/Jean_Billboard_Instanced.mat",
+                "Jean_Billboard_Instanced", new Color(0.08f, 0.31f, 0.11f), 0.12f, true);
 
-            Material ground = GetOrCreateMaterial(MATERIAL_FOLDER + "/PersonaB_ForestFloor.mat",
-                "PersonaB_ForestFloor", new Color(0.20f, 0.27f, 0.17f), 0.62f, false);
+            Material ground = GetOrCreateMaterial(MATERIAL_FOLDER + "/Jean_ForestFloor.mat",
+                "Jean_ForestFloor", new Color(0.20f, 0.27f, 0.17f), 0.62f, false);
 
-            Material moss = GetOrCreateMaterial(MATERIAL_FOLDER + "/PersonaB_MossPatches.mat",
-                "PersonaB_MossPatches", new Color(0.12f, 0.34f, 0.12f), 0.45f, false);
+            Material moss = GetOrCreateMaterial(MATERIAL_FOLDER + "/Jean_MossPatches.mat",
+                "Jean_MossPatches", new Color(0.12f, 0.34f, 0.12f), 0.45f, false);
 
-            Material leafLitter = GetOrCreateMaterial(MATERIAL_FOLDER + "/PersonaB_LeafLitter.mat",
-                "PersonaB_LeafLitter", new Color(0.37f, 0.27f, 0.14f), 0.72f, false);
+            Material leafLitter = GetOrCreateMaterial(MATERIAL_FOLDER + "/Jean_LeafLitter.mat",
+                "Jean_LeafLitter", new Color(0.37f, 0.27f, 0.14f), 0.72f, false);
 
-            Material path = GetOrCreateMaterial(MATERIAL_FOLDER + "/PersonaB_ForestPath.mat",
-                "PersonaB_ForestPath", new Color(0.45f, 0.36f, 0.22f), 0.70f, false);
+            Material path = GetOrCreateMaterial(MATERIAL_FOLDER + "/Jean_ForestPath.mat",
+                "Jean_ForestPath", new Color(0.45f, 0.36f, 0.22f), 0.70f, false);
 
-            Material rock = GetOrCreateMaterial(MATERIAL_FOLDER + "/PersonaB_Rocks.mat",
-                "PersonaB_Rocks", new Color(0.32f, 0.35f, 0.32f), 0.66f, false);
+            Material rock = GetOrCreateMaterial(MATERIAL_FOLDER + "/Jean_Rocks.mat",
+                "Jean_Rocks", new Color(0.32f, 0.35f, 0.32f), 0.66f, false);
 
-            Material grass = GetOrCreateMaterial(MATERIAL_FOLDER + "/PersonaB_Grass.mat",
-                "PersonaB_Grass", new Color(0.16f, 0.38f, 0.15f), 0.34f, true);
+            Material grass = GetOrCreateMaterial(MATERIAL_FOLDER + "/Jean_Grass.mat",
+                "Jean_Grass", new Color(0.16f, 0.38f, 0.15f), 0.34f, true);
 
-            Material wave = GetOrCreateTransparentMaterial(MATERIAL_FOLDER + "/PersonaB_GrowthWave.mat",
-                "PersonaB_GrowthWave", new Color(0.62f, 0.95f, 0.42f, 0.32f), 0.10f);
+            Material wave = GetOrCreateTransparentMaterial(MATERIAL_FOLDER + "/Jean_GrowthWave.mat",
+                "Jean_GrowthWave", new Color(0.62f, 0.95f, 0.42f, 0.32f), 0.10f);
 
             TreeSpecies species = GetOrCreateShowcaseSpecies();
             Terrain terrain = CreateSamplingTerrain();
@@ -75,7 +75,7 @@ namespace Bosque.EditorTools
             Camera camera = CreateCamera(pivot);
             CreateLighting();
 
-            var rendererObject = new GameObject("PersonaB_GPU_Instanced_Forest");
+            var rendererObject = new GameObject("Jean_GPU_Instanced_Forest");
             var renderer = rendererObject.AddComponent<LSystemInstancedForestRenderer>();
             renderer.species = species;
             renderer.baseTreeSeed = 425;
@@ -107,7 +107,7 @@ namespace Bosque.EditorTools
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log("[Persona B] Upgraded forest scene built at " + SCENE_PATH +
+            Debug.Log("[Jean] Upgraded forest scene built at " + SCENE_PATH +
                       ". Press Play: one L-system tree appears first, then the terrain-born forest grows.");
         }
 
@@ -118,7 +118,7 @@ namespace Bosque.EditorTools
 
         static void EnsureFolders()
         {
-            EnsureFolder("Assets", "ForestBGenerated");
+            EnsureFolder("Assets", "JeanGenerated");
             EnsureFolder("Assets", "Materials");
             EnsureFolder("Assets", "Species");
             EnsureFolder("Assets", "Scenes");
@@ -133,13 +133,13 @@ namespace Bosque.EditorTools
 
         static TreeSpecies GetOrCreateShowcaseSpecies()
         {
-            PersonaBTreeSpeciesAsset species = AssetDatabase.LoadAssetAtPath<PersonaBTreeSpeciesAsset>(SPECIES_PATH);
+            JeanTreeSpeciesAsset species = AssetDatabase.LoadAssetAtPath<JeanTreeSpeciesAsset>(SPECIES_PATH);
             if (species == null)
             {
                 if (AssetDatabase.LoadAssetAtPath<Object>(SPECIES_PATH) != null)
                     AssetDatabase.DeleteAsset(SPECIES_PATH);
 
-                species = ScriptableObject.CreateInstance<PersonaBTreeSpeciesAsset>();
+                species = ScriptableObject.CreateInstance<JeanTreeSpeciesAsset>();
                 AssetDatabase.CreateAsset(species, SPECIES_PATH);
             }
 
@@ -304,7 +304,7 @@ namespace Bosque.EditorTools
                 }
             }
 
-            var mesh = new Mesh { name = "PersonaB_ForestFloor" };
+            var mesh = new Mesh { name = "Jean_ForestFloor" };
             mesh.vertices = vertices;
             mesh.uv = uvs;
             mesh.triangles = triangles;
@@ -381,7 +381,7 @@ namespace Bosque.EditorTools
                 triangles[tri++] = d;
             }
 
-            var mesh = new Mesh { name = "PersonaB_ForestPath" };
+            var mesh = new Mesh { name = "Jean_ForestPath" };
             mesh.vertices = vertices;
             mesh.uv = uvs;
             mesh.triangles = triangles;
@@ -440,7 +440,7 @@ namespace Bosque.EditorTools
                 triangles.Add(start + 5);
             }
 
-            var mesh = new Mesh { name = "PersonaB_GrassBlades" };
+            var mesh = new Mesh { name = "Jean_GrassBlades" };
             mesh.SetVertices(vertices);
             mesh.SetUVs(0, uvs);
             mesh.SetTriangles(triangles, 0);
@@ -697,7 +697,7 @@ namespace Bosque.EditorTools
                 }
             }
 
-            var mesh = new Mesh { name = "PersonaB_LowPolyRock" };
+            var mesh = new Mesh { name = "Jean_LowPolyRock" };
             mesh.SetVertices(vertices);
             mesh.SetTriangles(triangles, 0);
             mesh.RecalculateNormals();

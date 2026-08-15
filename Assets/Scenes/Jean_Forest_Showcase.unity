@@ -2458,7 +2458,7 @@ GameObject:
   - component: {fileID: 455164589}
   - component: {fileID: 455164588}
   m_Layer: 0
-  m_Name: PersonaB_GPU_Instanced_Forest
+  m_Name: Jean_GPU_Instanced_Forest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

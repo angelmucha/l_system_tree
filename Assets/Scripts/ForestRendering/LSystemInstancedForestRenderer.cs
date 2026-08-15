@@ -124,7 +124,7 @@ namespace Bosque.ForestRendering
             sproutMinScale = Mathf.Clamp(sproutMinScale, 0.01f, 0.35f);
         }
 
-        [ContextMenu("Regenerate Persona B Forest")]
+        [ContextMenu("Regenerate Jean Forest")]
         public void Regenerate()
         {
             generated = false;
@@ -156,7 +156,7 @@ namespace Bosque.ForestRendering
             GenerateForestInstances();
             generated = true;
 
-            statusText = "Persona B ready: skeleton -> mesh -> instanced forest";
+            statusText = "Jean ready: skeleton -> mesh -> instanced forest";
         }
 
         void EnsureMaterials()
@@ -204,7 +204,7 @@ namespace Bosque.ForestRendering
         {
             var sp = ScriptableObject.CreateInstance<TreeSpecies>();
             sp.speciesId = 2026;
-            sp.displayName = "Persona B Showcase L-System";
+            sp.displayName = "Jean Showcase L-System";
             sp.axiom = "X";
             sp.rules = new[]
             {
@@ -510,7 +510,7 @@ namespace Bosque.ForestRendering
             GUI.Box(rect, "");
 
             GUILayout.BeginArea(new Rect(rect.x + 16, rect.y + 10, rect.width - 32, rect.height - 20));
-            GUILayout.Label("Procedural Forest - Persona B Rendering");
+            GUILayout.Label("Procedural Forest - Jean Rendering");
             GUILayout.Space(4);
             GUILayout.Label(statusText);
             GUILayout.Space(8);

@@ -37,8 +37,8 @@ Que demuestra la escena mejorada:
 Como probar:
 1. Abrir el proyecto D:\Eric\l_system_tree en Unity.
 2. Esperar a que compile.
-3. En el menu superior: Bosque > Persona B > Build Forest Showcase Scene.
-4. Abrir/usar la escena Assets/Scenes/PersonaB_Forest_Showcase.unity.
+3. En el menu superior: Bosque > Jean > Build Forest Showcase Scene.
+4. Abrir/usar la escena Assets/Scenes/Jean_Forest_Showcase.unity.
 5. Presionar Play.
 
 Frase corta para explicar:
