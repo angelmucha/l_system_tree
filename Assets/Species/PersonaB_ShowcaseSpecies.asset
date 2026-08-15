@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f192692c7b793640a25eea9f672b20d, type: 3}
+  m_Name: PersonaB_ShowcaseSpecies
+  m_EditorClassIdentifier: Assembly-CSharp::Bosque.ForestRendering.PersonaBTreeSpeciesAsset
+  speciesId: 2026
+  displayName: L-System Showcase Species
+  axiom: X
+  rules:
+  - symbol: 88
+    successor: FF[&+X][&-X][/^X][\^X]LL
+  iterations: 5
+  angleDeg: 24.5
+  baseLength: 0.62
+  lengthScale: 0.78
+  baseRadius: 0.16
+  radiusScale: 0.68
+  pinchFactor: 0.82
+  angleJitter: 0.22
+  lengthJitter: 0.12
+  leafScale: 0.38
+  leafDensity: 1
+  altitudeRange: {x: 0, y: 1000}
+  maxSlopeDeg: 36
+  minSpacing: 3.1
+  scaleRange: {x: 0.7, y: 1.45}
