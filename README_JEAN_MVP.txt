@@ -1,8 +1,8 @@
-PERSONA B - MVP DE BOSQUE PROCEDURAL
-====================================
+JEAN - MVP DE BOSQUE PROCEDURAL
+===============================
 
 Objetivo de esta parte:
-Tomar el arbol procedural de Persona A, que entrega un TreeSkeleton generado
+Tomar el arbol procedural base, que entrega un TreeSkeleton generado
 por L-system, y convertirlo en un bosque renderizado de forma eficiente.
 
 Que demuestra la escena mejorada:
@@ -42,7 +42,7 @@ Como probar:
 5. Presionar Play.
 
 Frase corta para explicar:
-"Persona A genera la estructura del arbol con L-systems. Mi parte toma ese
+"Mi companero genera la estructura del arbol con L-systems. Mi parte toma ese
 TreeSkeleton y lo convierte en un bosque renderizable: creo mallas, distribuyo
 instancias en terreno, aplico LOD, culling, GPU instancing, viento y benchmarks
 en pantalla."

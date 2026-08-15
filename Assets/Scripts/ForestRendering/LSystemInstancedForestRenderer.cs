@@ -11,7 +11,7 @@ namespace Bosque.ForestRendering
     {
         const int BATCH_SIZE = 1023;
 
-        [Header("Input from Persona A")]
+        [Header("Input from L-System Tree")]
         public TreeSpecies species;
         public int baseTreeSeed = 425;
 
@@ -337,7 +337,7 @@ namespace Bosque.ForestRendering
             {
                 revealedCount = 1;
                 revealProgress = -0.01f;
-                statusText = "1. Base tree: Persona A generates one L-system skeleton";
+                statusText = "1. Base tree: one L-system skeleton is generated";
                 return;
             }
 
