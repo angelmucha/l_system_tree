@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: specie
+  m_EditorClassIdentifier: Assembly-CSharp:Bosque.Contract:TreeSpecies
+  speciesId: 0
+  displayName: Especie sin nombre
+  axiom: F
+  rules:
+  - symbol: 70
+    successor: 'F[&+F]F[&-F][/^F]'
+  iterations: 6
+  angleDeg: 22.5
+  baseLength: 1
+  lengthScale: 0.85
+  baseRadius: 0.06
+  radiusScale: 0.75
+  pinchFactor: 0.85
+  angleJitter: 0.15
+  lengthJitter: 0.1
+  leafScale: 0.12
+  leafDensity: 1
+  altitudeRange: {x: 0, y: 1000}
+  maxSlopeDeg: 35
+  minSpacing: 4
+  scaleRange: {x: 0.85, y: 1.25}
